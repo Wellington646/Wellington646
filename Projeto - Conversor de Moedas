@@ -1,0 +1,77 @@
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class ConversorMoedas {
+    // URL da API com a chave de acesso (substitua "YOUR_API_KEY" pela sua chave)
+    private static final String API_URL = "https://v6.exchangerate-api.com/v6/YOUR_API_KEY/latest/";
+  public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Conversor de Moedas");
+        System.out.println("Escolha a conversão desejada:");
+        System.out.println("1. Dólar para Real");
+        System.out.println("2. Real para Dólar");
+        System.out.println("3. Euro para Real");
+        System.out.println("4. Real para Euro");
+        System.out.println("5. Iene para Real");
+        System.out.println("6. Real para Iene");
+
+        int escolha = scanner.nextInt();
+        System.out.println("Digite o valor a ser convertido:");
+        double valor = 
+    scanner.nextDouble();
+        double resultado = 0;
+
+        try {
+            switch (escolha) {
+                case 1:
+                    resultado = converter("USD", "BRL", valor);
+                    System.out.printf("%.2f dólares equivalem a %.2f reais.\n", valor, resultado);
+                    break;
+                case 2:
+                    resultado = converter("BRL", "USD", valor);
+                    System.out.printf("%.2f reais equivalem a %.2f dólares.\n", valor, resultado);
+                    break;
+                case 3:
+                    resultado = converter("EUR", "BRL", valor);
+                    System.out.printf("%.2f euros equivalem a %.2f reais.\n", valor, resultado);
+              break;
+                case 4:
+                    resultado = converter("BRL", "EUR", valor);
+                    System.out.printf("%.2f reais equivalem a %.2f euros.\n", valor, resultado);
+                    break;
+                case 5:
+                    resultado = converter("JPY", "BRL", valor);
+                    System.out.printf("%.2f ienes equivalem a %.2f reais.\n", valor, resultado);
+                    break;
+                case 6:
+                    resultado = converter("BRL", "JPY", valor);
+                    System.out.printf("%.2f reais equivalem a %.2f ienes.\n", valor, resultado);
+              break;
+                default:
+                    System.out.println("Opção inválida.");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao converter moedas: " + e.getMessage());
+        }
+
+        scanner.close();
+    }
+
+    private static double converter(String from, String to, double amount) throws Exception {
+        String urlStr = API_URL + from;
+        URL url = new URL(urlStr);
+        HttpURLConnection request = (HttpURLConnection) url.openConnection();
+      request.connect();
+
+        JsonParser jp = new JsonParser();
+        JsonObject root = jp.parse(new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
+        JsonObject rates = root.getAsJsonObject("conversion_rates");
+        double rate = rates.get(to).getAsDouble();
+
+        return amount * rate;
+    }
+}
